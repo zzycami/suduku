@@ -18,6 +18,7 @@ public class Sudoku extends Activity implements OnClickListener{
 	private Button exit;
 	private Button about;
 	private Button new_game;
+	private Button conti;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,9 @@ public class Sudoku extends Activity implements OnClickListener{
     	
     	new_game = (Button) findViewById(R.id.button_new_game);
     	new_game.setOnClickListener(this);
+    	
+    	conti = (Button) findViewById(R.id.button_continue);
+    	conti.setOnClickListener(this);
     }
 
 	@Override
@@ -49,6 +53,10 @@ public class Sudoku extends Activity implements OnClickListener{
 			break;
 		case R.id.button_new_game:
 			openNewGameDialog();
+			break;
+		case R.id.button_continue:
+			startGame(Game.DIFFICULTY_CONTINUE);
+			break;
 		}
 	}
 	

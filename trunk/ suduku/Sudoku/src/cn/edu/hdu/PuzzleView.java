@@ -6,6 +6,8 @@ import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,6 +15,11 @@ import android.view.animation.AnimationUtils;
 
 public class PuzzleView extends View{
 	public final static String TAG = "Sudoku";
+	
+	private static final String SELX = "selX";
+	private static final String SELY = "selY";
+	private static final String VIEW_STATE = "viewState";
+	private static final int ID = 100;
 	
 	private final Game game;
 	
@@ -28,7 +35,31 @@ public class PuzzleView extends View{
 		game = (Game) context;
 		setFocusable(true);
 		setFocusableInTouchMode(true);
+		setId(ID);
 	}
+	
+	
+
+	@Override
+	protected Parcelable onSaveInstanceState() {
+		Parcelable par =  super.onSaveInstanceState();
+		Bundle bundle = new Bundle();
+		bundle.putInt(SELX, selX);
+		bundle.putInt(SELY, selY);
+		bundle.putParcelable(VIEW_STATE, par);
+		return bundle;
+	}
+
+
+
+	@Override
+	protected void onRestoreInstanceState(Parcelable state) {
+		Bundle bundle = (Bundle) state;
+		select(bundle.getInt(SELX), bundle.getInt(SELY));
+		super.onRestoreInstanceState(bundle.getParcelable(VIEW_STATE));
+	}
+
+
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -99,20 +130,22 @@ public class PuzzleView extends View{
 		}
 	
 		// draw the hints
-		Paint hint = new Paint();
-		int c[] = {
-				getResources().getColor(R.color.puzzle_hint_0),
-				getResources().getColor(R.color.puzzle_hint_1),
-				getResources().getColor(R.color.puzzle_hint_2)
-		};
-		Rect rect = new Rect();
-		for(int i=0;i<9;i++){
-			for(int j=0;j<9;j++){
-				int moveleft = 9 - game.getUsedTiles(i, j).length;
-				if(moveleft < c.length){
-					getRect(i, j, rect);
-					hint.setColor(c[moveleft]);
-					canvas.drawRect(rect, hint);
+		if(Prefs.getHint(getContext())){
+			Paint hint = new Paint();
+			int c[] = {
+					getResources().getColor(R.color.puzzle_hint_0),
+					getResources().getColor(R.color.puzzle_hint_1),
+					getResources().getColor(R.color.puzzle_hint_2)
+			};
+			Rect rect = new Rect();
+			for(int i=0;i<9;i++){
+				for(int j=0;j<9;j++){
+					int moveleft = 9 - game.getUsedTiles(i, j).length;
+					if(moveleft < c.length){
+						getRect(i, j, rect);
+						hint.setColor(c[moveleft]);
+						canvas.drawRect(rect, hint);
+					}
 				}
 			}
 		}
