@@ -10,6 +10,9 @@ public class Game extends Activity{
 	public final static String TAG = "Sudoku";
 	
 	public final static String KEY_DIFFICULTY = "cn.edu.hdu.difficulty";
+	private final static String PREF_PUZZLE = "puzzle";
+	
+	public final static int DIFFICULTY_CONTINUE = 0;
 	public final static int DIFFICULTY_EASY = 1;
 	public final static int DIFFICULTY_MEDIUM = 2;
 	public final static int DIFFICULTY_HARD = 3;
@@ -51,6 +54,9 @@ public class Game extends Activity{
 	private int[] getPuzzle(int diff) {
 		String puz;
 		switch(diff){
+		case DIFFICULTY_CONTINUE:
+			puz = getPreferences(MODE_PRIVATE).getString(PREF_PUZZLE, easyPuzzle); 
+			break;
 		case DIFFICULTY_EASY: puz =easyPuzzle;break;
 		case DIFFICULTY_MEDIUM: puz = mediumPuzzle;break;
 		case DIFFICULTY_HARD: puz = hardPuzzle;break;
@@ -187,8 +193,14 @@ public class Game extends Activity{
 
 	@Override
 	protected void onPause() {
-		Music.stop(this);
 		super.onPause();
+		
+		Music.stop(this);
+		
+		// save the current puzzle
+		getPreferences(MODE_PRIVATE).edit()
+		.putString(PREF_PUZZLE, toPuzzleString(puzzle))
+		.commit();
 	}
 	
 	
