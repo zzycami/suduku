@@ -179,4 +179,18 @@ public class Game extends Activity{
 		return used[x][y];
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Music.play(this, R.raw.game);
+	}
+
+	@Override
+	protected void onPause() {
+		Music.stop(this);
+		super.onPause();
+	}
+	
+	
+
 }
