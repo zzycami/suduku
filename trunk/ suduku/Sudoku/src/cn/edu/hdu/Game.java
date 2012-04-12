@@ -12,10 +12,10 @@ public class Game extends Activity{
 	public final static String KEY_DIFFICULTY = "cn.edu.hdu.difficulty";
 	private final static String PREF_PUZZLE = "puzzle";
 	
-	public final static int DIFFICULTY_CONTINUE = 0;
-	public final static int DIFFICULTY_EASY = 1;
-	public final static int DIFFICULTY_MEDIUM = 2;
-	public final static int DIFFICULTY_HARD = 3;
+	public final static int DIFFICULTY_CONTINUE = -1;
+	public final static int DIFFICULTY_EASY = 0;
+	public final static int DIFFICULTY_MEDIUM = 1;
+	public final static int DIFFICULTY_HARD = 2;
 	
 	private final String easyPuzzle = 
 			"360000000004230800000004200" + 
@@ -36,13 +36,14 @@ public class Game extends Activity{
 	private final int used[][][] = new int[9][9][];
 	
 	private PuzzleView puzzleView;
+	private int diff;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.d(TAG, "onCreate");
 		
-		int diff = getIntent().getIntExtra(KEY_DIFFICULTY, DIFFICULTY_EASY);
+		diff = getIntent().getIntExtra(KEY_DIFFICULTY, DIFFICULTY_EASY);
 		puzzle = getPuzzle(diff);
 		calculateUsedTiles();
 		
@@ -94,6 +95,7 @@ public class Game extends Activity{
 		
 		// horizontal
 		for(int i=0;i<9;i++){
+			if(y == i) continue;
 			int temp = getTile(x, i);
 			if(temp != 0){
 				c[temp - 1] = temp;
@@ -102,6 +104,7 @@ public class Game extends Activity{
 		
 		// vertical 
 		for(int i=0;i<9;i++){
+			if(x == i) continue;
 			int temp = getTile(i, y);
 			if(temp != 0){
 				c[temp - 1] = temp;
@@ -111,9 +114,9 @@ public class Game extends Activity{
 		// same cell block
 		int startx = (int)(x/3)*3;
 		int starty = (int)(y/3)*3;
-		for(int i=startx;i<9;i++){
-			for(int j=starty;j<9;j++){
-				if(x == i && y == j)
+		for(int i=startx;i<startx + 3;i++){
+			for(int j=starty;j<starty + 3;j++){
+				if(x == i  || y == j)
 					continue;
 				int temp = getTile(i, j);
 				if(temp != 0){
@@ -140,11 +143,23 @@ public class Game extends Activity{
 	}
 	
 	private int getTile(int x, int y){
-		return puzzle[x*9 + y];
+		return puzzle[y*9 + x];
 	}
 	
 	public void setTile(int x, int y, int value){
-		puzzle[x*9 + y] = value;
+		puzzle[y*9 + x] = value;
+	}
+	
+	public boolean checkStaticTile(int x, int y){
+		String puz;
+		switch(diff){
+		case DIFFICULTY_EASY: puz =easyPuzzle;break;
+		case DIFFICULTY_MEDIUM: puz = mediumPuzzle;break;
+		case DIFFICULTY_HARD: puz = hardPuzzle;break;
+		default: puz = easyPuzzle;break;
+		}
+		int num = fromPuzzleString(puz)[y*9 + x];
+		return num != 0;
 	}
 
 	public String getTileString(int x, int y) {
@@ -157,6 +172,10 @@ public class Game extends Activity{
 	}
 
 	public void showKeypadOrError(int x, int y) {
+		// this position is filled by origin puzzle
+		if(checkStaticTile(x, y)){
+			return ;
+		}
 		int tiles[] = getUsedTiles(x, y);
 		if(tiles.length == 9){
 			Toast toast = Toast.makeText(this, R.string.no_moves_label, Toast.LENGTH_SHORT);
@@ -169,6 +188,12 @@ public class Game extends Activity{
 
 	public boolean setTileIfValid(int x, int y, int number) {
 		int tiles[] = getUsedTiles(x, y);
+		
+		// this position is filled by origin puzzle
+		if(checkStaticTile(x, y)){
+			return false;
+		}
+		
 		if(number != 0){
 			for(int temp : tiles){
 				if(temp == number){

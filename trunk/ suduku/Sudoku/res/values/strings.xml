@@ -32,4 +32,7 @@
     <string name="game_title">Game</string>
     <string name="no_moves_label">No moves</string>
     <string name="keypad_title">Keypad</string>
+    
+    <string name="return_title">Hint</string>
+    <string name="return_text">Return to main menu</string>
 </resources>

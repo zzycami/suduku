@@ -1,6 +1,9 @@
 package cn.edu.hdu;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
@@ -119,13 +122,26 @@ public class PuzzleView extends View{
 		foreground.setTextScaleX(width/height);
 		foreground.setTextAlign(Paint.Align.CENTER);
 		foreground.setAntiAlias(true);
+		
+		Paint static_number = new Paint();
+		static_number.setColor(getResources().getColor(R.color.puzzle_static_number));
+		static_number.setStyle(Style.FILL);
+		static_number.setTextSize(height*0.75f);
+		static_number.setTextScaleX(width/height);
+		static_number.setTextAlign(Paint.Align.CENTER);
+		static_number.setAntiAlias(true);
+		
 		// draw the number in the center of the tile
 		FontMetrics fm = foreground.getFontMetrics();
 		float x = width/2;
 		float y = height/2 - (fm.ascent + fm.descent)/2;
 		for(int i=0;i<9;i++){
 			for(int j=0;j<9;j++){
-				canvas.drawText(game.getTileString(i, j), i*width + x, j*height + y, foreground);
+				if(game.checkStaticTile(i, j)){
+					canvas.drawText(game.getTileString(i, j), i*width + x, j*height + y, static_number);
+				}else {
+					canvas.drawText(game.getTileString(i, j), i*width + x, j*height + y, foreground);
+				}
 			}
 		}
 	
@@ -178,9 +194,33 @@ public class PuzzleView extends View{
 		case KeyEvent.KEYCODE_9:setSelectedTile(9);break;
 		case KeyEvent.KEYCODE_ENTER:
 		case KeyEvent.KEYCODE_DPAD_CENTER:game.showKeypadOrError(selX, selY);break;
+		case KeyEvent.KEYCODE_BACK:showReturnDialog();break;
 		default:super.onKeyDown(keyCode, event);break;
 		}
 		return true;
+	}
+	
+	private void showReturnDialog(){
+		AlertDialog.Builder build = new Builder(getContext());
+		build.setTitle(R.string.return_title);
+		build.setMessage(R.string.return_text);
+		build.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				game.finish();
+			}
+		});
+		
+		build.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		
+		build.create().show();
 	}
 	
 	@Override
