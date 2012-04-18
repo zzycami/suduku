@@ -53,7 +53,7 @@ public class Game extends Activity{
 	}
 
 	private int[] getPuzzle(int diff) {
-		String puz;
+		String puz; 
 		switch(diff){
 		case DIFFICULTY_CONTINUE:
 			puz = getPreferences(MODE_PRIVATE).getString(PREF_PUZZLE, easyPuzzle); 
